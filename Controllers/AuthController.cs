@@ -1,6 +1,5 @@
 ﻿using BluntServe.Services;
 using BluntServe.ViewModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +18,11 @@ namespace BluntServe.Controllers
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// 登录
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
@@ -55,6 +59,34 @@ namespace BluntServe.Controllers
                 User = userResponse
             });
         }
+
+
+        //[HttpPost("refresh")]
+        //public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        //{
+        //    // 验证 refresh token（从数据库或Redis）
+        //    var isValid = await ValidateRefreshToken(request.RefreshToken);
+        //    if (!isValid)
+        //        return Unauthorized(new { message = "Refresh token 无效或已过期" });
+
+        //    // 从refresh token中解析用户信息
+        //    var userId = ExtractUserIdFromRefreshToken(request.RefreshToken);
+        //    var user = await _userService.GetUserByIdAsync(userId);
+
+        //    // 生成新的access token
+        //    var newAccessToken = _tokenService.GenerateToken(user);
+
+        //    // 可选的：生成新的refresh token（滚动刷新）
+        //    var newRefreshToken = GenerateRefreshToken(user.Id);
+
+        //    return Ok(new
+        //    {
+        //        access_token = newAccessToken,
+        //        token_type = "Bearer",
+        //        expires_in = 3600,
+        //        refresh_token = newRefreshToken
+        //    });
+        //}
 
     }
 
