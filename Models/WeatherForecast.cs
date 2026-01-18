@@ -1,4 +1,4 @@
-namespace BluntServe
+namespace BluntServe.Models
 {
     public class WeatherForecast
     {

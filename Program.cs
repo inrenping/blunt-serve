@@ -1,12 +1,27 @@
+using BluntServe;
 using BluntServe.Models;
 using BluntServe.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+builder.Services.AddDbContext<PgDbContext>(options =>
+{
+    var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+    options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+});
+
+// 将 DbContextFactory 注册为 Scoped 而不是 Singleton
+builder.Services.AddDbContextFactory<PgDbContext>((services, options) =>
+{
+    var config = services.GetRequiredService<IConfiguration>();
+    options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+}, ServiceLifetime.Scoped);
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BluntServe.Services
 {
-    public class TokenService: ITokenService
+    public class TokenService : ITokenService
     {
         private readonly JwtSettings _jwtSettings;
         private readonly SymmetricSecurityKey _signingKey;
@@ -17,6 +17,7 @@ namespace BluntServe.Services
             _jwtSettings = jwtSettings.Value;
             _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         }
+
 
         /// <summary>
         /// 生成访问令牌
@@ -29,11 +30,11 @@ namespace BluntServe.Services
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.UserEmail)
             };
 
             // 添加角色声明
@@ -54,48 +55,16 @@ namespace BluntServe.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
+        /// <summary>
+        /// 生成刷新 Token
+        /// </summary>
+        /// <returns></returns>
         public string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
-        }
-
-        public (string username, int userId)? ValidateToken(string token)
-        {
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = _jwtSettings.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = _jwtSettings.Audience,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = _signingKey,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
-
-                var username = principal.FindFirst(ClaimTypes.Name)?.Value;
-                var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (username != null && int.TryParse(userIdClaim, out var userId))
-                {
-                    return (username, userId);
-                }
-
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
         }
     }
 }
