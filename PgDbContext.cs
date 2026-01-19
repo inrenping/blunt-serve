@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BluntServe
 {
-    public class PgDbContext: DbContext
+    public class PgDbContext : DbContext
     {
         public PgDbContext(DbContextOptions<PgDbContext> options) : base(options)
         {
@@ -11,7 +11,8 @@ namespace BluntServe
         public PgDbContext()
         {
         }
-
+        public DbSet<User> User { get; set; }
+        public DbSet<UserRefreshToken> UserRefreshToken { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -34,11 +35,25 @@ namespace BluntServe
                 entityType.AddAnnotation("Relational:Protected", true);
             }
         }
-        public DbSet<User> User { get; set; }
-        private void ConfigureEntities(ModelBuilder modelBuilder) {
+        private void ConfigureEntities(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("t_users", "blunt");
+                entity.HasKey(e => e.UserId);
+            });
 
-            modelBuilder.Entity<User>().ToTable("t_users", "blunt");
-            modelBuilder.Entity<User>().HasKey(e => e.UserId);
+
+            modelBuilder.Entity<UserRefreshToken>(entity =>
+            {
+                entity.ToTable("t_user_refresh_tokens", "blunt");
+                entity.HasKey(e => e.Id);
+                // 级联删除
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

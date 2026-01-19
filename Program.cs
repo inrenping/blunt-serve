@@ -15,7 +15,6 @@ builder.Services.AddDbContext<PgDbContext>(options =>
     options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
 });
 
-// 将 DbContextFactory 注册为 Scoped 而不是 Singleton
 builder.Services.AddDbContextFactory<PgDbContext>((services, options) =>
 {
     var config = services.GetRequiredService<IConfiguration>();
@@ -26,9 +25,7 @@ builder.Services.AddDbContextFactory<PgDbContext>((services, options) =>
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // 允许接收大小写不敏感的 JSON
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-        // 保持属性原名（不转换为 camelCase）
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
@@ -36,7 +33,6 @@ builder.Services.AddControllers()
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
 
-// 3. 配置 Authentication（必须添加！）
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 builder.Services.AddAuthentication(options =>
 {
@@ -57,16 +53,14 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-// 4. 添加授权服务
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(); 
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-
 app.UseAuthentication();
 app.UseAuthorization();
 

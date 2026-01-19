@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace BluntServe.Models
 {
+    /// <summary>
+    /// 用户表
+    /// </summary>
     public class User
     {
         [Key]
@@ -19,7 +21,7 @@ namespace BluntServe.Models
         [Column("create_time")]
         public DateTime CreateTime { get; set; } = DateTime.UtcNow;
         [Column("update_time")]
-        public DateTime? UpdateTime { get; set; }
+        public DateTime UpdateTime { get; set; } = DateTime.UtcNow;
         [Column("active")]
         public bool Active { get; set; } = true;
         [NotMapped]
