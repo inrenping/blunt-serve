@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BluntServe.Controllers
 {
@@ -37,7 +38,7 @@ namespace BluntServe.Controllers
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            //// 保存刷新令牌
+            // 保存刷新令牌
             await _authService.SaveRefreshTokenAsync(
                 user.UserId,
                 refreshToken,
@@ -58,6 +59,35 @@ namespace BluntServe.Controllers
                 RefreshToken = refreshToken,
                 Expires = DateTime.UtcNow.AddMinutes(60),
                 User = userResponse
+            });
+        }
+
+        /// <summary>
+        /// 获取当前登录用户信息
+        /// </summary>
+        [HttpGet("me")]
+        public async Task<ActionResult> GetCurrentUserInfo()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "无效的令牌信息" });
+            }
+            var userId = userIdClaim.Value;
+
+            var user = await _authService.GetUserByIdAsync(userId);
+
+            if (user == null || !user.Active)
+            {
+                return Unauthorized(new { message = "用户状态异常或已不存在" });
+            }
+            return Ok(new
+            {
+                Id = user.UserId,
+                Username = user.UserName,
+                Email = user.UserEmail,
+                Roles = user.Roles,
+                LastLoginTime = DateTime.Now
             });
         }
     }

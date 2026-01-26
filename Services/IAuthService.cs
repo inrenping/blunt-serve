@@ -15,6 +15,7 @@ namespace BluntServe.Services
         /// <param name="password"></param>
         /// <returns></returns>
         Task<User?> ValidateUserAsync(string email, string password);
+
         /// <summary>
         /// 保存 RefreshToken 
         /// </summary>
@@ -23,5 +24,12 @@ namespace BluntServe.Services
         /// <param name="dateTime"></param>
         /// <returns></returns>
         Task SaveRefreshTokenAsync(int id, string refreshToken, DateTime dateTime);
+
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<User?> GetUserByIdAsync(string userId);
     }
 }

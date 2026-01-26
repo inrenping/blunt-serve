@@ -7,7 +7,7 @@ namespace BluntServe.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly PgDbContext _dbContext; 
+        private readonly PgDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
@@ -27,7 +27,7 @@ namespace BluntServe.Services
         {
             var user = await _dbContext.User.AsNoTracking().FirstOrDefaultAsync(u => u.UserEmail == email && u.Active);
             if (user == null) return null;
-            var isPasswordValid = VerifyPassword(user,password, user.PasswordHash);
+            var isPasswordValid = VerifyPassword(user, password, user.PasswordHash);
             return isPasswordValid ? user : null;
         }
 
@@ -37,7 +37,7 @@ namespace BluntServe.Services
         /// <param name="password"></param>
         /// <param name="storedHash"></param>
         /// <returns></returns>
-        private bool VerifyPassword(User user,string password, string storedHash)
+        private bool VerifyPassword(User user, string password, string storedHash)
         {
             var result = _passwordHasher.VerifyHashedPassword(user, storedHash, password);
             return result == PasswordVerificationResult.Success;
@@ -71,6 +71,18 @@ namespace BluntServe.Services
             await _dbContext.UserRefreshToken.AddAsync(newUserRefreshToken);
             await _dbContext.SaveChangesAsync();
 
+        }
+
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<User?> GetUserByIdAsync(string userId)
+        {
+            var user = await _dbContext.User.AsNoTracking().FirstOrDefaultAsync(u => String.Equals(userId, u.UserId.ToString()) && u.Active);
+            if (user == null) return null;
+            return user;
         }
     }
 }
