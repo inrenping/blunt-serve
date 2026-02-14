@@ -1,7 +1,7 @@
 ﻿using BluntServe.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BluntServe
+namespace BluntServe.Data
 {
     public class PgDbContext : DbContext
     {

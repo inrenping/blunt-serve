@@ -1,4 +1,5 @@
-﻿using BluntServe.Models;
+﻿using BluntServe.Data;
+using BluntServe.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
