@@ -10,18 +10,18 @@ namespace BluntServe.Models
     {
         [Key]
         [Column("user_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
-
         [Column("user_name")]
         public string UserName { get; set; } = string.Empty;
         [Column("user_email")]
         public string UserEmail { get; set; } = string.Empty;
         [Column("password_hash")]
         public string PasswordHash { get; set; } = string.Empty;
-        [Column("create_time")]
-        public DateTime CreateTime { get; set; } = DateTime.UtcNow;
-        [Column("update_time")]
-        public DateTime UpdateTime { get; set; } = DateTime.UtcNow;
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [Column("updated_at")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         [Column("active")]
         public bool Active { get; set; } = true;
         [NotMapped]

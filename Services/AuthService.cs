@@ -17,12 +17,6 @@ namespace BluntServe.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        /// <summary>
-        /// 验证用户名密码
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
         public async Task<User?> ValidateUserAsync(string email, string password)
         {
             var user = await _dbContext.User.AsNoTracking().FirstOrDefaultAsync(u => u.UserEmail == email && u.Active);
@@ -31,24 +25,12 @@ namespace BluntServe.Services
             return isPasswordValid ? user : null;
         }
 
-        /// <summary>
-        /// 验证密码
-        /// </summary>
-        /// <param name="password"></param>
-        /// <param name="storedHash"></param>
-        /// <returns></returns>
         private bool VerifyPassword(User user, string password, string storedHash)
         {
             var result = _passwordHasher.VerifyHashedPassword(user, storedHash, password);
             return result == PasswordVerificationResult.Success;
         }
-        /// <summary>
-        /// 保存 刷新 Token
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="refreshToken"></param>
-        /// <param name="dateTime"></param>
-        /// <returns></returns>
+
         public async Task SaveRefreshTokenAsync(int userId, string refreshToken, DateTime expiresTime)
         {
             var activeTokens = await _dbContext.UserRefreshToken
@@ -61,9 +43,9 @@ namespace BluntServe.Services
             var newUserRefreshToken = new UserRefreshToken
             {
                 UserId = userId,
-                Token = refreshToken,
+                refreshToken = refreshToken,
                 ExpiresTime = expiresTime,
-                CreatedTime = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
                 Revoked = false,
                 CreatedIp = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString()
@@ -73,16 +55,46 @@ namespace BluntServe.Services
 
         }
 
-        /// <summary>
-        /// 获取用户信息
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
         public async Task<User?> GetUserByIdAsync(string userId)
         {
             var user = await _dbContext.User.AsNoTracking().FirstOrDefaultAsync(u => String.Equals(userId, u.UserId.ToString()) && u.Active);
             if (user == null) return null;
             return user;
+        }
+
+        public async Task<UserRefreshToken?> GetRefreshTokenAsync(string refreshToken)
+        {
+            var userRefreshToken = await _dbContext.UserRefreshToken.FirstOrDefaultAsync(x => x.refreshToken == refreshToken && !x.Active);
+            if (userRefreshToken == null) return null;
+            return userRefreshToken;
+        }
+
+        public async Task RevokedRefreshTokenAsync(string refreshToken)
+        {
+            var storedToken = await _dbContext.UserRefreshToken
+                .FirstOrDefaultAsync(x => x.refreshToken == refreshToken);
+
+            if (storedToken != null)
+            {
+                storedToken.Revoked = true;
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task RevokeAllUserTokensAsync(string userId)
+        {
+            var tokens = await _dbContext.UserRefreshToken
+                .Where(t => String.Equals(userId, t.UserId.ToString()) && !t.Revoked)
+                .ToListAsync();
+
+            if (tokens.Any())
+            {
+                foreach (var token in tokens)
+                {
+                    token.Revoked = true;
+                }
+                await _dbContext.SaveChangesAsync();
+            }
         }
     }
 }

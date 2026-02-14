@@ -2,6 +2,9 @@
 
 namespace BluntServe.Services
 {
+    /// <summary>
+    /// Token 处理
+    /// </summary>
     public interface ITokenService
     {
         /// <summary>

@@ -1,4 +1,5 @@
 using BluntServe;
+using BluntServe.Filters;
 using BluntServe.Models;
 using BluntServe.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,6 +58,10 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddHttpContextAccessor();
 
+
+// TODO 改成用 Scrutor 扫描
+builder.Services.AddScoped<LogFilter>();
+builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 

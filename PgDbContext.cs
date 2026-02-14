@@ -54,6 +54,24 @@ namespace BluntServe
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<UserSocial>(entity =>
+            {
+                entity.ToTable("t_user_social", "blunt");
+                entity.HasKey(e => e.Id);
+                // 级联删除
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserVerifyCode>(entity =>
+            {
+                entity.ToTable("t_user_verify_codes", "blunt");
+                entity.HasKey(e => e.Id);
+            });
+
         }
     }
 }

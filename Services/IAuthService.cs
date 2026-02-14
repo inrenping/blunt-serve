@@ -31,5 +31,26 @@ namespace BluntServe.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<User?> GetUserByIdAsync(string userId);
+
+        /// <summary>
+        /// 根据 refreshToken 查询 
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        Task<UserRefreshToken?> GetRefreshTokenAsync(string refreshToken);
+
+        /// <summary>
+        /// 刷新 refreshToken 时删除原有 refreshToken 有效状态
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        Task RevokedRefreshTokenAsync(string refreshToken);
+
+        /// <summary>
+        /// 注销时删除 refreshToken 有效状态
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task RevokeAllUserTokensAsync(string userId);
     }
 }

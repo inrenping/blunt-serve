@@ -1,5 +1,7 @@
-﻿using BluntServe.Services;
+﻿using BluntServe.Models;
+using BluntServe.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -50,7 +52,7 @@ namespace BluntServe.Controllers
                 Username = user.UserName,
                 Email = user.UserEmail,
                 Roles = user.Roles,
-                CreatedAt = user.CreateTime
+                CreatedAt = user.CreatedAt
             };
 
             return Ok(new
@@ -59,6 +61,45 @@ namespace BluntServe.Controllers
                 RefreshToken = refreshToken,
                 Expires = DateTime.UtcNow.AddMinutes(60),
                 User = userResponse
+            });
+        }
+        /// <summary>
+        /// 刷新 Token
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("refresh")]
+        public async Task<ActionResult> Refresh([FromBody] RefreshRequest request)
+        {
+            if (string.IsNullOrEmpty(request.RefreshToken))
+            {
+                return BadRequest(new { message = "Refresh Token 不能为空" });
+            }
+            var storedToken = await _authService.GetRefreshTokenAsync(request.RefreshToken);
+            if (storedToken == null || storedToken.ExpiresTime < DateTime.UtcNow)
+            {
+                return Unauthorized(new { message = "Refresh Token 已失效，请重新登录" });
+            }
+            var user = await _authService.GetUserByIdAsync(storedToken.UserId.ToString());
+            if (user == null || !user.Active)
+            {
+                return Unauthorized(new { message = "用户不存在或已被禁用" });
+            }
+            var newAccessToken = _tokenService.GenerateAccessToken(user);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+            await _authService.RevokedRefreshTokenAsync(request.RefreshToken);
+            // 保存刷新令牌
+            await _authService.SaveRefreshTokenAsync(
+                user.UserId,
+                newRefreshToken,
+                DateTime.UtcNow.AddDays(7)
+            );
+            return Ok(new
+            {
+                Token = newAccessToken,
+                RefreshToken = newRefreshToken,
+                Expires = DateTime.UtcNow.AddMinutes(60)
             });
         }
 
@@ -74,12 +115,14 @@ namespace BluntServe.Controllers
                 return Unauthorized(new { message = "无效的令牌信息" });
             }
             var userId = userIdClaim.Value;
-
             var user = await _authService.GetUserByIdAsync(userId);
-
-            if (user == null || !user.Active)
+            if (user == null)
             {
-                return Unauthorized(new { message = "用户状态异常或已不存在" });
+                return Unauthorized(new { message = "用户不存在" });
+            }
+            if (!user.Active)
+            {
+                return Unauthorized(new { message = "用户状态异常" });
             }
             return Ok(new
             {
@@ -89,6 +132,18 @@ namespace BluntServe.Controllers
                 Roles = user.Roles,
                 LastLoginTime = DateTime.Now
             });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized();
+            }
+            await _authService.RevokeAllUserTokensAsync(userIdClaim);
+            return Ok(new { message = "已安全退出所有设备" });
         }
     }
 }

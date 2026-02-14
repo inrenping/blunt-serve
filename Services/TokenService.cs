@@ -18,12 +18,6 @@ namespace BluntServe.Services
             _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         }
 
-
-        /// <summary>
-        /// 生成访问令牌
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
         public string GenerateAccessToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -55,10 +49,7 @@ namespace BluntServe.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-        /// <summary>
-        /// 生成刷新 Token
-        /// </summary>
-        /// <returns></returns>
+
         public string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];

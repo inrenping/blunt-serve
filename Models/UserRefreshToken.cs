@@ -12,7 +12,8 @@ namespace BluntServe.Models
         /// 主键 ID
         /// </summary>
         [Key]
-        [Column("id")] 
+        [Column("id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>
@@ -24,8 +25,8 @@ namespace BluntServe.Models
         /// <summary>
         /// 刷新令牌字符串
         /// </summary>
-        [Column("token")] 
-        public string Token { get; set; } = null!;
+        [Column("refresh_token")] 
+        public string refreshToken { get; set; } = null!;
 
         /// <summary>
         /// 令牌过期时间
@@ -36,8 +37,8 @@ namespace BluntServe.Models
         /// <summary>
         /// 令牌创建时间，默认为当前 UTC 时间
         /// </summary>
-        [Column("create_time")] 
-        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+        [Column("created_at")] 
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// 创建此令牌时的客户端 IP 地址
@@ -67,5 +68,8 @@ namespace BluntServe.Models
         /// </summary>
         [NotMapped]
         public bool Active => !Revoked && !Expired;
+
+        [ForeignKey("UserId")]
+        public virtual User? User { get; set; }
     }
 }
