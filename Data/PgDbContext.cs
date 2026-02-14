@@ -12,7 +12,10 @@ namespace BluntServe.Data
         {
         }
         public DbSet<User> User { get; set; }
-        public DbSet<UserRefreshToken> UserRefreshToken { get; set; }
+        public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
+        public DbSet<UserSocial> UserSocials { get; set; }
+        public DbSet<UserVerifyCode> UserVerifyCodes { get; set; }
+        public DbSet<SysLog> SysLogs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -72,6 +75,12 @@ namespace BluntServe.Data
                 entity.HasKey(e => e.Id);
             });
 
+
+            modelBuilder.Entity<SysLog>(entity =>
+            {
+                entity.ToTable("t_sys_log", "blunt");
+                entity.HasKey(e => e.Id);
+            });
         }
     }
 }

@@ -34,7 +34,7 @@ namespace BluntServe.Services
 
         public async Task SaveRefreshTokenAsync(int userId, string refreshToken, DateTime expiresTime)
         {
-            var activeTokens = await _dbContext.UserRefreshToken
+            var activeTokens = await _dbContext.UserRefreshTokens
                 .Where(u => u.UserId == userId && !u.Revoked && u.ExpiresTime > DateTime.UtcNow)
                 .ToListAsync();
             foreach (var oldToken in activeTokens)
@@ -51,7 +51,7 @@ namespace BluntServe.Services
                 CreatedIp = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString()
             };
-            await _dbContext.UserRefreshToken.AddAsync(newUserRefreshToken);
+            await _dbContext.UserRefreshTokens.AddAsync(newUserRefreshToken);
             await _dbContext.SaveChangesAsync();
 
         }
@@ -65,14 +65,14 @@ namespace BluntServe.Services
 
         public async Task<UserRefreshToken?> GetRefreshTokenAsync(string refreshToken)
         {
-            var userRefreshToken = await _dbContext.UserRefreshToken.FirstOrDefaultAsync(x => x.refreshToken == refreshToken && !x.Active);
+            var userRefreshToken = await _dbContext.UserRefreshTokens.FirstOrDefaultAsync(x => x.refreshToken == refreshToken && !x.Active);
             if (userRefreshToken == null) return null;
             return userRefreshToken;
         }
 
         public async Task RevokedRefreshTokenAsync(string refreshToken)
         {
-            var storedToken = await _dbContext.UserRefreshToken
+            var storedToken = await _dbContext.UserRefreshTokens
                 .FirstOrDefaultAsync(x => x.refreshToken == refreshToken);
 
             if (storedToken != null)
@@ -84,7 +84,7 @@ namespace BluntServe.Services
 
         public async Task RevokeAllUserTokensAsync(string userId)
         {
-            var tokens = await _dbContext.UserRefreshToken
+            var tokens = await _dbContext.UserRefreshTokens
                 .Where(t => String.Equals(userId, t.UserId.ToString()) && !t.Revoked)
                 .ToListAsync();
 

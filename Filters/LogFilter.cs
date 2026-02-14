@@ -1,5 +1,9 @@
-﻿using BluntServe.Services;
+﻿using BluntServe.Attributes;
+using BluntServe.Models;
+using BluntServe.Services;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Diagnostics;
+using System.Security.Claims;
 
 namespace BluntServe.Filters
 {
@@ -11,9 +15,32 @@ namespace BluntServe.Filters
         {
             _logService = logService;
         }
-        public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            throw new NotImplementedException();
+            var stopwatch = Stopwatch.StartNew();
+            var request = context.HttpContext.Request;
+            var logAttribute = context.ActionDescriptor.EndpointMetadata.OfType<LogAttribute>().FirstOrDefault();
+            var executedContext = await next();
+            stopwatch.Stop();
+            if (logAttribute != null)
+            {
+                var log = new SysLog
+                {
+                    UserId = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                    UserName = context.HttpContext.User.Identity?.Name,
+                    LogType = "OPERATE",
+                    ModuleName = logAttribute.Module,
+                    OpDesc = logAttribute.Operation,
+                    ReqUrl = request.Path + request.QueryString,
+                    ReqMethod = request.Method,
+                    IPAddress = context.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    UserAgent = request.Headers["User-Agent"].ToString(),
+                    DurationMs = (int)stopwatch.ElapsedMilliseconds,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                await _logService.SaveLogAsync(log);
+            }
         }
     }
 }
