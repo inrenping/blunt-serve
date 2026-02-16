@@ -5,6 +5,7 @@ using BluntServe.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Resend;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,12 +59,20 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddHttpContextAccessor();
 
-
 // TODO 改成用 Scrutor 扫描
 builder.Services.AddScoped<LogFilter>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o =>
+{
+    var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+    o.ApiToken = config.GetConnectionString("ResendKey")!;
+});
+builder.Services.AddTransient<IResend, ResendClient>();
 
 var app = builder.Build();
 app.UseAuthentication();
