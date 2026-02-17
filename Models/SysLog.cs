@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
 
 namespace BluntServe.Models
 {
@@ -36,7 +37,7 @@ namespace BluntServe.Models
         public string? ReqParams { get; set; }
 
         [Column("ip_address", TypeName = "inet")]
-        public string? IPAddress { get; set; }
+        public IPAddress? IpAddress { get; set; }
 
         [Column("user_agent")]
         public string? UserAgent { get; set; }

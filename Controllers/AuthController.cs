@@ -1,7 +1,5 @@
-﻿using BluntServe.Models;
-using BluntServe.Services;
+﻿using BluntServe.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

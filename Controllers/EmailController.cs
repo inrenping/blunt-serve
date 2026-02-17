@@ -1,4 +1,5 @@
-﻿using BluntServe.Services;
+﻿using BluntServe.Attributes;
+using BluntServe.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Resend;
@@ -13,24 +14,27 @@ namespace BluntServe.Controllers
 
         private readonly IEmailService _emailService;
 
-        [HttpGet]
-        [Route("email/send")]
+        public EmailController(IEmailService emailService)
+        {
+            _emailService = emailService;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("demo")]
+        [Log("测试邮件接口")]
         public async Task<string> EmailSendFixed()
         {
-            /*
-             * 
-             */
             var message = new EmailMessage();
-            message.From = "you@domain.com";
-            message.To.Add("user@gmail.com");
-            message.Subject = "Hello from Controller API";
-            message.TextBody = "Email using Resend .NET SDK";
+            message.From = "Blunt <onboarding@resend.dev>";
+            message.To.Add("inrenping@gmail.com");
+            message.Subject = "hello world";
+            message.HtmlBody = "<strong>it works!Email using Resend .NET SDK!</strong>";
 
             var resp = await _emailService.EmailSend(message);
 
             // _logger.LogInformation("Sent email, with Id = {EmailId}", resp.Content);
 
-            return resp.Content.ToString();
+            return resp;
         }
     }
 }

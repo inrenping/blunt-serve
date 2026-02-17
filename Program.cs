@@ -1,41 +1,45 @@
 using BluntServe.Data;
 using BluntServe.Filters;
+using BluntServe.Interfaces;
 using BluntServe.Models;
 using BluntServe.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Resend;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<PgDbContext>(options =>
 {
-    var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-    options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(connectionString);
 });
 
 builder.Services.AddDbContextFactory<PgDbContext>((services, options) =>
 {
-    var config = services.GetRequiredService<IConfiguration>();
-    options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(connectionString);
 }, ServiceLifetime.Scoped);
 
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
+builder.Services.AddControllers(options =>
+{
+    options.Filters.AddService<LogFilter>();
+})
+    .AddJsonOptions(op =>
     {
-        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        op.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        op.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
-
+// JWT 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-
-
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -56,23 +60,20 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddHttpContextAccessor();
 
-// TODO 改成用 Scrutor 扫描
 builder.Services.AddScoped<LogFilter>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
-builder.Services.AddOptions();
-builder.Services.AddHttpClient<ResendClient>();
-builder.Services.Configure<ResendClientOptions>(o =>
+builder.Services.Configure<ResendClientOptions>(options =>
 {
-    var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-    o.ApiToken = config.GetConnectionString("ResendKey")!;
+    options.ApiToken = builder.Configuration["Resend:ApiToken"];
 });
-builder.Services.AddTransient<IResend, ResendClient>();
+
+builder.Services.AddHttpClient<IResend, ResendClient>();
 
 var app = builder.Build();
 app.UseAuthentication();

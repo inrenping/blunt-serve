@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
 
 namespace BluntServe.Models
 {
@@ -39,7 +40,7 @@ namespace BluntServe.Models
         /// 存储请求者的 IP 地址
         /// </summary>
         [Column("ip_address", TypeName = "inet")]
-        public string? IpAddress { get; set; }
+        public IPAddress? IpAddress { get; set; }
 
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;

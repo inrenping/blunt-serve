@@ -1,7 +1,6 @@
 ﻿using BluntServe.Models;
-using Microsoft.AspNetCore.Identity.Data;
 
-namespace BluntServe.Services
+namespace BluntServe.Interfaces
 {
     /// <summary>
     /// 身份认证服务接口，负责用户登录验证、注册及令牌管理

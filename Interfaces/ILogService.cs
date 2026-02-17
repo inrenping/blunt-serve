@@ -1,6 +1,6 @@
 ﻿using BluntServe.Models;
 
-namespace BluntServe.Services
+namespace BluntServe.Interfaces
 {
     /// <summary>
     /// 日志处理

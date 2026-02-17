@@ -1,6 +1,6 @@
 ﻿using BluntServe.Attributes;
+using BluntServe.Interfaces;
 using BluntServe.Models;
-using BluntServe.Services;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Diagnostics;
 using System.Security.Claims;
@@ -33,7 +33,7 @@ namespace BluntServe.Filters
                     OpDesc = logAttribute.Operation,
                     ReqUrl = request.Path + request.QueryString,
                     ReqMethod = request.Method,
-                    IPAddress = context.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    IpAddress = context.HttpContext.Connection.RemoteIpAddress,
                     UserAgent = request.Headers["User-Agent"].ToString(),
                     DurationMs = (int)stopwatch.ElapsedMilliseconds,
                     CreatedAt = DateTime.UtcNow,

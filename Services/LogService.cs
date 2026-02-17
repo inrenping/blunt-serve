@@ -1,4 +1,5 @@
 ﻿using BluntServe.Data;
+using BluntServe.Interfaces;
 using BluntServe.Models;
 using Microsoft.EntityFrameworkCore;
 

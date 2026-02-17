@@ -1,6 +1,6 @@
 ﻿using Resend;
 
-namespace BluntServe.Services
+namespace BluntServe.Interfaces
 {
     public interface IEmailService
     {

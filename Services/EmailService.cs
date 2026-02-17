@@ -1,5 +1,6 @@
 ﻿
 using BluntServe.Data;
+using BluntServe.Interfaces;
 using Resend;
 namespace BluntServe.Services
 {
