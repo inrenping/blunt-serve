@@ -29,11 +29,7 @@ namespace BluntServe.Controllers
             message.To.Add("inrenping@gmail.com");
             message.Subject = "hello world";
             message.HtmlBody = "<strong>it works!Email using Resend .NET SDK!</strong>";
-
             var resp = await _emailService.EmailSend(message);
-
-            // _logger.LogInformation("Sent email, with Id = {EmailId}", resp.Content);
-
             return resp;
         }
     }

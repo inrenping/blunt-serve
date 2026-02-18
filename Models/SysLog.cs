@@ -35,6 +35,8 @@ namespace BluntServe.Models
 
         [Column("req_params", TypeName = "jsonb")]
         public string? ReqParams { get; set; }
+        [Column("resp_data", TypeName = "jsonb")]
+        public string? RespData { get; set; }
 
         [Column("ip_address", TypeName = "inet")]
         public IPAddress? IpAddress { get; set; }
