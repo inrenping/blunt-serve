@@ -1,0 +1,40 @@
+name: Deploy BluntServe to Vultr
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Publish
+        # 使用 -r linux-x64 确保生成针对 Linux 的优化产物
+        run: dotnet publish -c Release -r linux-x64 --no-self-contained -o ./publish
+
+      - name: Copy files to Vultr
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "publish/*"
+          target: "/var/www/blunt-serve" # 确保路径与你手动创建的一致
+          strip_components: 1
+
+      - name: Restart Service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # 重启我们马上要创建的 systemd 服务
+          script: sudo systemctl restart blunt-serve.service
