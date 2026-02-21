@@ -9,6 +9,18 @@
 ## 部署相关
 
 ~~~
+# 1. 生成一对全新的密钥，不要设密码
+ssh-keygen -t ed25519 -N "" -f ~/id_deploy
+
+# 2. 将公钥放入授权名单
+cat ~/id_deploy.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+
+# 3. 关键一步：用特殊方式显示私钥，防止隐藏字符
+cat ~/id_deploy
+~~~
+
+~~~
 sudo vim /etc/systemd/system/blunt-serve.service
 ~~~
 
