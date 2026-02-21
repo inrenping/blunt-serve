@@ -21,6 +21,38 @@ namespace BluntServe.Controllers
         }
 
         /// <summary>
+        /// 登录前检查账户有效性
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("check")]
+        public async Task<ActionResult> ValidateEmail([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest(new { message = "邮箱地址不能为空" });
+            }
+            var user = await _authService.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "该邮箱尚未注册" });
+            }
+
+            if (!user.Active)
+            {
+                return BadRequest(new { message = "该账号已被禁用" });
+            }
+
+            return Ok(new
+            {
+                message = "邮箱有效",
+                exists = true,
+                username = user.UserName
+            });
+        }
+        /// <summary>
         /// 登录
         /// </summary>
         /// <param name="request"></param>

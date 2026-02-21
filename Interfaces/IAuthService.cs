@@ -30,7 +30,12 @@ namespace BluntServe.Interfaces
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<User?> GetUserByIdAsync(string userId);
-
+        /// <summary>
+        /// 登录前检查账号有效性
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        Task<User?> GetUserByEmailAsync(string email);
         /// <summary>
         /// 根据 refreshToken 查询 
         /// </summary>

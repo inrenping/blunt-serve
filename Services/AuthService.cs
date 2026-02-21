@@ -98,5 +98,14 @@ namespace BluntServe.Services
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return null;
+            }
+            return await _dbContext.User.AsNoTracking().FirstOrDefaultAsync(u => u.UserEmail.ToLower() == email.ToLower());
+        }
     }
 }
