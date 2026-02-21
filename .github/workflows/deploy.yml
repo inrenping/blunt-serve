@@ -2,14 +2,16 @@ name: Deploy BluntServe to Vultr
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"] # 修正为你的主分支 master
+  workflow_dispatch: # 允许你在 GitHub Actions 页面手动点击运行
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
@@ -17,7 +19,7 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Publish
-        # 使用 -r linux-x64 确保生成针对 Linux 的优化产物
+        # -r linux-x64 指定目标平台，--no-self-contained 使用服务器已安装的运行时
         run: dotnet publish -c Release -r linux-x64 --no-self-contained -o ./publish
 
       - name: Copy files to Vultr
@@ -27,8 +29,9 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "publish/*"
-          target: "/var/www/blunt-serve" # 确保路径与你手动创建的一致
+          target: "/var/www/blunt-serve"
           strip_components: 1
+          overwrite: true # 确保覆盖旧的 dll 文件
 
       - name: Restart Service
         uses: appleboy/ssh-action@master
@@ -36,5 +39,8 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # 重启我们马上要创建的 systemd 服务
-          script: sudo systemctl restart blunt-serve.service
+          # 使用 sudo -S 或确保 root 直接运行，重启你的 systemd 服务
+          script: |
+            sudo systemctl daemon-reload
+            sudo systemctl restart blunt-serve.service
+            sudo systemctl status blunt-serve.service --no-pager
