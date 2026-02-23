@@ -21,6 +21,14 @@ namespace BluntServe.Controllers
         }
 
         /// <summary>
+        /// 一个简单的测试接口
+        /// </summary>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("hello")]
+        public IActionResult Hello() => Ok("Hello World");
+
+        /// <summary>
         /// 登录前检查账户有效性
         /// </summary>
         /// <param name="email"></param>

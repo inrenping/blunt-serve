@@ -56,3 +56,6 @@ sudo systemctl start blunt-serve.service
 # 查看是否运行成功
 sudo systemctl status blunt-serve.service
 ~~~
+# 用户机密文件
+
+相关密码配置不要上传到 github ，本地使用的时候放在项目的用户机密文件中，服务器上放在 `appsettings.Production.json` 单独上传部署。

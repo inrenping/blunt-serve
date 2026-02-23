@@ -69,7 +69,5 @@ namespace BluntServe.Models
         [NotMapped]
         public bool Active => !Revoked && !Expired;
 
-        [ForeignKey("UserId")]
-        public virtual User? User { get; set; }
     }
 }
