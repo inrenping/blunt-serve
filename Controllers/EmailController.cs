@@ -11,7 +11,6 @@ namespace BluntServe.Controllers
     [Route("api/[controller]")]
     public class EmailController
     {
-
         private readonly IEmailService _emailService;
 
         public EmailController(IEmailService emailService)
@@ -29,6 +28,19 @@ namespace BluntServe.Controllers
             message.To.Add("inrenping@gmail.com");
             message.Subject = "hello world";
             message.HtmlBody = "<strong>it works!Email using Resend .NET SDK!</strong>";
+            var resp = await _emailService.EmailSend(message);
+            return resp;
+        }
+
+        [HttpGet("send")]
+        [Log("发送邮件接口")]
+        public async Task<string> EmailSend(string email,string subject,string body)
+        {
+            var message = new EmailMessage();
+            message.From = "Blunt <onboarding@resend.dev>";
+            message.To.Add(email);
+            message.Subject = subject;
+            message.HtmlBody = body;
             var resp = await _emailService.EmailSend(message);
             return resp;
         }
